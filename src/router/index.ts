@@ -28,11 +28,20 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "edge" */ "../views/basic/edge"),
   },
+  {
+    path: "/basic/dnd",
+    name: "dnd",
+    component: () => import(/* webpackChunkName: "dnd" */ "../views/basic/dnd"),
+  },
+  {
+    path: "/extension/bpmn",
+    name: "bpmn",
+    component: () =>
+      import(/* webpackChunkName: "bpmn" */ "../views/extension/bpmn/Index"),
+  },
 ];
-
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
 });
-
 export default router;
