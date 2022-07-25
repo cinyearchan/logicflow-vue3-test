@@ -15,6 +15,9 @@ import BpmnIo from "./io";
 import "ant-design-vue/lib/button/style/index.css";
 import "@logicflow/extension/lib/style/index.css";
 import "./index.css";
+import { useState } from "@/hooks/state";
+import { message } from "ant-design-vue";
+import PropertyPanel from "./components/property";
 
 const config = {
   stopScrollGraph: true,
@@ -162,6 +165,7 @@ export default defineComponent({
     const graph = ref(null) as any as { value: HTMLElement };
     const lf = ref(null) as any as LogicFlow;
     const rendered = ref(true);
+    const [nodeData, setNodeData] = useState();
 
     LogicFlow.use(BpmnElement); // 启用 bpmn 元素
     LogicFlow.use(DndPanel); // 启用左侧拖拽元素面板
@@ -170,6 +174,16 @@ export default defineComponent({
     LogicFlow.use(Menu); // 启用右键菜单
     LogicFlow.use(Snapshot); // 启用截图
     LogicFlow.use(BpmnXmlAdapter); // 启用 bpmn xml json 转换插件
+
+    const initEvent = (lf: LogicFlow) => {
+      lf.on("element:click", ({ data }) => {
+        setNodeData(data);
+        console.log(JSON.stringify(lf.getGraphData()));
+      });
+      lf.on("connection:not-allowed", (data: any) => {
+        message.error(data.msg);
+      });
+    };
 
     const initGraph = () => {
       lf.value = new LogicFlow({
@@ -180,18 +194,31 @@ export default defineComponent({
           type: "dot",
         },
       });
+      // 将 选区 放置在 控制面板
+      lf.value.extension.control.addItem({
+        key: "select",
+        iconClass: "lf-control-select",
+        title: "选区",
+        text: "选择",
+        onClick: () => {
+          lf.value.openSelectionSelect();
+          lf.value.once("selection:selected", () => {
+            lf.value.closeSelectionSelect();
+          });
+        },
+      });
       // lf.extension.selectionSelect.openSelectionSelect();
       lf.value.extension.dndPanel.setPatternItems([
-        {
-          label: "选区",
-          icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAOVJREFUOBGtVMENwzAIjKP++2026ETdpv10iy7WFbqFyyW6GBywLCv5gI+Dw2Bluj1znuSjhb99Gkn6QILDY2imo60p8nsnc9bEo3+QJ+AKHfMdZHnl78wyTnyHZD53Zzx73MRSgYvnqgCUHj6gwdck7Zsp1VOrz0Uz8NbKunzAW+Gu4fYW28bUYutYlzSa7B84Fh7d1kjLwhcSdYAYrdkMQVpsBr5XgDGuXwQfQr0y9zwLda+DUYXLaGKdd2ZTtvbolaO87pdo24hP7ov16N0zArH1ur3iwJpXxm+v7oAJNR4JEP8DoAuSFEkYH7cAAAAASUVORK5CYII=",
-          callback: () => {
-            lf.value.openSelectionSelect();
-            lf.value.once("selection:selected", () => {
-              lf.value.closeSelectionSelect();
-            });
-          },
-        },
+        // {
+        //   label: "选区",
+        //   icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAOVJREFUOBGtVMENwzAIjKP++2026ETdpv10iy7WFbqFyyW6GBywLCv5gI+Dw2Bluj1znuSjhb99Gkn6QILDY2imo60p8nsnc9bEo3+QJ+AKHfMdZHnl78wyTnyHZD53Zzx73MRSgYvnqgCUHj6gwdck7Zsp1VOrz0Uz8NbKunzAW+Gu4fYW28bUYutYlzSa7B84Fh7d1kjLwhcSdYAYrdkMQVpsBr5XgDGuXwQfQr0y9zwLda+DUYXLaGKdd2ZTtvbolaO87pdo24hP7ov16N0zArH1ur3iwJpXxm+v7oAJNR4JEP8DoAuSFEkYH7cAAAAASUVORK5CYII=",
+        //   callback: () => {
+        //     lf.value.openSelectionSelect();
+        //     lf.value.once("selection:selected", () => {
+        //       lf.value.closeSelectionSelect();
+        //     });
+        //   },
+        // },
         {
           type: "bpmn:startEvent",
           text: "开始",
@@ -227,6 +254,7 @@ export default defineComponent({
       window.lf = lf.value;
       lf.value.render(data);
       rendered.value = true;
+      initEvent(lf.value);
     };
 
     onMounted(() => {
@@ -237,6 +265,8 @@ export default defineComponent({
       graph,
       lf,
       rendered,
+      nodeData,
+      setNodeData,
     };
   },
 
@@ -249,11 +279,38 @@ export default defineComponent({
         </div>
       );
     }
+
+    const updateProperty = (id: string, data: any) => {
+      const node = this.lf.graphModel.nodesMap[id];
+      const edge = this.lf.graphModel.edgesMap[id];
+      if (node) {
+        node.model.setProperties(Object.assign(node.model.properties, data));
+      } else if (edge) {
+        edge.model.setProperties(Object.assign(edge.model.properties, data));
+      }
+    };
+
+    // 隐藏属性面板
+    const hidePropertyPanel = () => {
+      this.setNodeData(undefined);
+    };
+
     return (
       <Fragment>
         <div id="graph" ref="graph" class="viewport"></div>
         {/* <BpmnPattern lf={this.lf}></BpmnPattern> */}
         {tools}
+        {/* {this.nodeData ? (
+          <div class="property-panel">
+            {PropertyPanel({
+              nodeData: this.nodeData,
+              updateProperty,
+              hidePropertyPanel,
+            })}
+          </div>
+        ) : (
+          ""
+        )} */}
       </Fragment>
     );
   },
