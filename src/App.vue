@@ -1,7 +1,10 @@
 <template>
   <!-- <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-link to="/basic/node">/basic/node</router-link> |
+    <router-link to="/basic/edge">/basic/edge</router-link> |
+    <router-link to="/basic/dnd">/basic/dnd</router-link> |
+    <router-link to="/extension/bpmn">/extension/bpmn</router-link> |
+    <router-link to="/extension/approve">/extension/approve</router-link>
   </nav> -->
   <div class="App">
     <div class="container">

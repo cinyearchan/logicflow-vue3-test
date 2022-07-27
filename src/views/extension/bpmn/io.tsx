@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { defineComponent, PropType } from "vue";
 import LogicFlow from "@logicflow/core";
+import { download } from "@/utils";
 
 const downloadImg = require("./img/download.png");
 const photo = require("./img/img.png");
@@ -8,21 +9,6 @@ const uploadImg = require("./img/upload.png");
 
 type IProps = {
   lf: LogicFlow;
-};
-
-const download = (filename: string, text: string) => {
-  const element = document.createElement("a");
-  element.setAttribute(
-    "href",
-    "data:text/plain;charset=utf-8," + encodeURIComponent(text)
-  );
-  element.setAttribute("download", filename);
-
-  element.style.display = "none";
-  document.body.appendChild(element);
-
-  element.click();
-  document.body.removeChild(element);
 };
 
 type FileEventTarget = EventTarget & { files: FileList };
@@ -37,6 +23,7 @@ export default defineComponent({
   methods: {
     downloadXml() {
       const data = (this.lf as LogicFlow).getGraphData() as string;
+      console.log("data", data);
       download("logic-flow.xml", data);
     },
     uploadXml(ev: Event) {

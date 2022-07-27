@@ -1,0 +1,31 @@
+.graph-io {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 9999;
+  background:rgba(255,255,255,0.8);
+  box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  padding: 10px;
+  display: flex;
+}
+.graph-io>span {
+  margin: 0 5px;
+  cursor: pointer;
+}
+#upload-btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+}
+.upload {
+  position: absolute;
+  z-index: 99;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.upload::-webkit-file-upload-button{
+  cursor: pointer;
+}

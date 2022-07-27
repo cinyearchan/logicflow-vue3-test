@@ -11,6 +11,7 @@ import {
 } from "@logicflow/extension";
 // import BpmnPattern from "./pattern";
 import BpmnIo from "./io";
+import IoTools from "@/components/io";
 // import { Button } from "ant-design-vue";
 import "ant-design-vue/lib/button/style/index.css";
 import "@logicflow/extension/lib/style/index.css";
@@ -248,12 +249,22 @@ export default defineComponent({
       LogicFlow.use(BpmnXmlAdapter); // 启用 bpmn xml json 转换插件
     });
 
+    const uploadCallback = (event: ProgressEvent<FileReader>) => {
+      if (event.target) {
+        const xml = event.target.result as string;
+        if (lf.value) {
+          lf.value.render(xml);
+        }
+      }
+    };
+
     return {
       graph,
       lf,
       rendered,
       nodeData,
       setNodeData,
+      uploadCallback,
     };
   },
 
@@ -263,6 +274,11 @@ export default defineComponent({
       tools = (
         <div>
           <BpmnIo lf={this.lf}></BpmnIo>
+          {/* <IoTools
+            lf={this.lf}
+            downloadName="logic-flow.xml"
+            uploadCallback={(event) => this.uploadCallback(event)}
+          ></IoTools> */}
         </div>
       );
     }
