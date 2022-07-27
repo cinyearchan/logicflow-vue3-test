@@ -39,6 +39,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "bpmn" */ "../views/extension/bpmn/Index"),
   },
+  {
+    path: "/extension/approve",
+    name: "approve",
+    component: () =>
+      import(/* webpackChunkName: "approve" */ "../views/extension/approve"),
+  },
 ];
 const router = createRouter({
   history: createWebHashHistory(),

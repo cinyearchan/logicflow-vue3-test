@@ -10,6 +10,7 @@ import LogicFlow, {
   PolygonNodeModel,
 } from "@logicflow/core";
 import GraphModel from "@logicflow/core/types/model/GraphModel";
+import { ref, toRefs } from "vue";
 import { nodeProperty } from "../type";
 
 export default function RegisterNode(lf: LogicFlow) {
@@ -41,33 +42,45 @@ export default function RegisterNode(lf: LogicFlow) {
   class ApproverNode extends RectNode {
     static extendKey = "UserTaskNode";
     getLabelShape() {
-      const { x, y, width, height, properties } = this.props.model;
-      const { labelColor, approveTypeLabel } = properties as nodeProperty;
+      const { x, y, properties } = toRefs(this.props.model);
+      const width = ref(this.props.model.width);
+      const height = ref(this.props.model.height);
+      // const { labelColor, approveTypeLabel } = toRefs(
+      //   properties as unknown as nodeProperty
+      // );
+      const labelColor = ref(
+        (properties as unknown as nodeProperty).labelColor
+      );
+      const approveTypeLabel = ref(
+        (properties as unknown as nodeProperty).approveTypeLabel
+      );
       return h(
         "text",
         {
-          fill: labelColor,
+          fill: labelColor.value,
           fontSize: 12,
-          x: x - width / 2 + 5,
-          y: y - height / 2 + 15,
+          x: x.value - width.value / 2 + 5,
+          y: y.value - height.value / 2 + 15,
           width: 50,
           height: 25,
         },
-        approveTypeLabel
+        approveTypeLabel.value
       );
     }
     getShape() {
-      const { x, y, width, height, radius } = this.props.model;
+      const { x, y, radius } = toRefs(this.props.model);
+      const width = ref(this.props.model.width);
+      const height = ref(this.props.model.height);
       const style = this.props.model.getNodeStyle();
       return h("g", {}, [
         h("rect", {
           ...style,
-          x: x - width / 2,
-          y: y - height / 2,
-          rx: radius,
-          ry: radius,
-          width,
-          height,
+          x: x.value - width.value / 2,
+          y: y.value - height.value / 2,
+          rx: radius.value,
+          ry: radius.value,
+          width: width.value,
+          height: height.value,
         }),
         this.getLabelShape(),
       ]);

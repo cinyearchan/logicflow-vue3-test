@@ -16,8 +16,6 @@ import "ant-design-vue/lib/button/style/index.css";
 import "@logicflow/extension/lib/style/index.css";
 import "./index.css";
 import { useState } from "@/hooks/state";
-import { message } from "ant-design-vue";
-import PropertyPanel from "./components/property";
 
 const config = {
   stopScrollGraph: true,
@@ -173,17 +171,6 @@ export default defineComponent({
     LogicFlow.use(Control); // 启用控制面板
     LogicFlow.use(Menu); // 启用右键菜单
     LogicFlow.use(Snapshot); // 启用截图
-    LogicFlow.use(BpmnXmlAdapter); // 启用 bpmn xml json 转换插件
-
-    const initEvent = (lf: LogicFlow) => {
-      lf.on("element:click", ({ data }) => {
-        setNodeData(data);
-        console.log(JSON.stringify(lf.getGraphData()));
-      });
-      lf.on("connection:not-allowed", (data: any) => {
-        message.error(data.msg);
-      });
-    };
 
     const initGraph = () => {
       lf.value = new LogicFlow({
@@ -254,11 +241,11 @@ export default defineComponent({
       window.lf = lf.value;
       lf.value.render(data);
       rendered.value = true;
-      initEvent(lf.value);
     };
 
     onMounted(() => {
       initGraph();
+      LogicFlow.use(BpmnXmlAdapter); // 启用 bpmn xml json 转换插件
     });
 
     return {
@@ -279,38 +266,11 @@ export default defineComponent({
         </div>
       );
     }
-
-    const updateProperty = (id: string, data: any) => {
-      const node = this.lf.graphModel.nodesMap[id];
-      const edge = this.lf.graphModel.edgesMap[id];
-      if (node) {
-        node.model.setProperties(Object.assign(node.model.properties, data));
-      } else if (edge) {
-        edge.model.setProperties(Object.assign(edge.model.properties, data));
-      }
-    };
-
-    // 隐藏属性面板
-    const hidePropertyPanel = () => {
-      this.setNodeData(undefined);
-    };
-
     return (
       <Fragment>
         <div id="graph" ref="graph" class="viewport"></div>
         {/* <BpmnPattern lf={this.lf}></BpmnPattern> */}
         {tools}
-        {/* {this.nodeData ? (
-          <div class="property-panel">
-            {PropertyPanel({
-              nodeData: this.nodeData,
-              updateProperty,
-              hidePropertyPanel,
-            })}
-          </div>
-        ) : (
-          ""
-        )} */}
       </Fragment>
     );
   },

@@ -1,5 +1,5 @@
-import { Form, Select, Input, Button } from "ant-design-vue";
-import { DownOutlined } from "@ant-design/icons";
+import { Form, FormItem, Select, Input, Button } from "ant-design-vue";
+import { DownOutlined } from "@ant-design/icons-vue";
 import { approveUser } from "../config";
 import { IApproveUser } from "../type";
 import "ant-design-vue/dist/antd.css";
@@ -15,28 +15,51 @@ const PropertyPanel = (props) => {
       );
     });
     const approveSelect = (
-      <Form.item class="form-property" label="审核节点类型" name="approveType">
-        <Select>{approveUserOption}</Select>
-      </Form.item>
+      <FormItem class="form-property" label="审核节点类型" name="approveType">
+        <Select
+          v-model:value={props.nodeData.properties.approveType}
+          onChange={handleSelectChange}
+        >
+          {approveUserOption}
+        </Select>
+      </FormItem>
     );
     return approveSelect;
   };
   const getApiUrl = () => {
     const Api = (
-      <Form.item label="API" name="api">
-        <Input />
-      </Form.item>
+      <FormItem label="API" name="api">
+        <Input
+          v-model:value={props.nodeData.properties.api}
+          onPressEnter={handlePressEnter}
+        />
+      </FormItem>
     );
     return Api;
   };
-  const onFormLayoutChange = (value: any, all: any) => {
+  const handleSelectChange = (value: any, option: any) => {
+    // console.log("selectChange", value);
+    // console.log("option", option);
+    const result = {
+      approveType: value,
+      approveTypeLabel: "",
+    };
     approveUser.forEach((item) => {
-      if (item.value === value.approveType) {
-        value["approveTypeLabel"] = item.label;
+      if (item.value === result.approveType) {
+        result["approveTypeLabel"] = item.label;
       }
     });
-    props.updateProperty(props.nodeData.id, value);
+    props.updateProperty(props.nodeData.id, result);
   };
+  const handlePressEnter = (e: KeyboardEvent) => {
+    props.updateProperty(props.nodeData.id, {
+      api:
+        (e.target as HTMLInputElement)?.value === null
+          ? ""
+          : (e.target as HTMLInputElement)?.value,
+    });
+  };
+
   return (
     <div>
       <h2>属性面板</h2>
@@ -44,7 +67,6 @@ const PropertyPanel = (props) => {
         key={props.nodeData.id}
         layout="inline"
         model={props.nodeData.properties}
-        onValuesChange={onFormLayoutChange}
       >
         <span class="form-property">
           类型：<span>{props.nodeData.type}</span>
@@ -52,6 +74,7 @@ const PropertyPanel = (props) => {
         <span class="form-property">
           文案：<span>{props.nodeData.text?.value}</span>
         </span>
+        {/* 这里就是根据组件类型渲染相应的属性表单 */}
         {props.nodeData.type === "approver" ? getApproveList() : ""}
         {props.nodeData.type === "judgement" ? getApiUrl() : ""}
       </Form>
