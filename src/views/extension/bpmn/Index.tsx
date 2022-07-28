@@ -10,9 +10,7 @@ import {
   SelectionSelect,
 } from "@logicflow/extension";
 // import BpmnPattern from "./pattern";
-import BpmnIo from "./io";
 import IoTools from "@/components/io";
-// import { Button } from "ant-design-vue";
 import "ant-design-vue/lib/button/style/index.css";
 import "@logicflow/extension/lib/style/index.css";
 import "./index.css";
@@ -172,6 +170,7 @@ export default defineComponent({
     LogicFlow.use(Control); // 启用控制面板
     LogicFlow.use(Menu); // 启用右键菜单
     LogicFlow.use(Snapshot); // 启用截图
+    LogicFlow.use(BpmnXmlAdapter); // 启用 bpmn xml json 转换插件
 
     const initGraph = () => {
       lf.value = new LogicFlow({
@@ -240,16 +239,19 @@ export default defineComponent({
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       window.lf = lf.value;
-      lf.value.render(data);
+      const initialXmlData = BpmnXmlAdapter.adapterXmlOut(data);
+      // console.log("xmlData", initialXmlData);
+      lf.value.render(initialXmlData);
       rendered.value = true;
     };
 
     onMounted(() => {
       initGraph();
-      LogicFlow.use(BpmnXmlAdapter); // 启用 bpmn xml json 转换插件
     });
 
     const uploadCallback = (event: ProgressEvent<FileReader>) => {
+      // console.log("cb");
+      // console.log("target", event.target);
       if (event.target) {
         const xml = event.target.result as string;
         if (lf.value) {
@@ -273,12 +275,12 @@ export default defineComponent({
     if (this.rendered) {
       tools = (
         <div>
-          <BpmnIo lf={this.lf}></BpmnIo>
-          {/* <IoTools
+          {/* <BpmnIo lf={this.lf}></BpmnIo> */}
+          <IoTools
             lf={this.lf}
-            downloadName="logic-flow.xml"
+            downloadName={`01-logic-flow-${Date.now()}.xml`}
             uploadCallback={(event) => this.uploadCallback(event)}
-          ></IoTools> */}
+          ></IoTools>
         </div>
       );
     }

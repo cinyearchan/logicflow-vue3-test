@@ -19,9 +19,12 @@ const IoTools = (props: {
   uploadCallback: (event: ProgressEvent<FileReader>) => void;
 }) => {
   const downloadData = () => {
-    const data = props.lf.getGraphData() as string;
-    console.log("lf", props.lf);
-    console.log("data", data);
+    let data = props.lf.getGraphData() as string;
+    // console.log("lf", props.lf);
+    if (typeof data === "object") {
+      data = JSON.stringify(data);
+    }
+    // console.log(typeof data);
     download(props.downloadName, data);
   };
   const uploadData = (ev: Event) => {

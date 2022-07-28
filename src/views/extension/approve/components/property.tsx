@@ -68,12 +68,12 @@ const PropertyPanel = (props) => {
         layout="inline"
         model={props.nodeData.properties}
       >
-        <span class="form-property">
+        <div class="form-property">
           类型：<span>{props.nodeData.type}</span>
-        </span>
-        <span class="form-property">
+        </div>
+        <div class="form-property">
           文案：<span>{props.nodeData.text?.value}</span>
-        </span>
+        </div>
         {/* 这里就是根据组件类型渲染相应的属性表单 */}
         {props.nodeData.type === "approver" ? getApproveList() : ""}
         {props.nodeData.type === "judgement" ? getApiUrl() : ""}

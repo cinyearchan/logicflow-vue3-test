@@ -3,10 +3,11 @@ import LogicFlow from "@logicflow/core";
 import PropertyPanel from "./components/property";
 import NodePanel from "./components/nodePanel";
 import RegisterNode from "./components/registerNode";
+import IoTools from "@/components/io";
 import { themeApprove, data } from "./config";
 import "./index.css";
 import "@logicflow/extension/lib/style/index.css";
-import { defineComponent, onMounted, ref } from "vue";
+import { defineComponent, Fragment, onMounted, ref } from "vue";
 import { useState } from "@/hooks/state";
 import {
   Control,
@@ -91,11 +92,23 @@ export default defineComponent({
       initGraph();
     });
 
+    const uploadCallback = (event: ProgressEvent<FileReader>) => {
+      // console.log("cb");
+      // console.log("target", event.target);
+      if (event.target) {
+        const json = JSON.parse(event.target.result as string);
+        if (lf.value) {
+          lf.value.render(json);
+        }
+      }
+    };
+
     return {
       graph,
       lf,
       nodeData,
       setNodeData,
+      uploadCallback,
     };
   },
 
@@ -118,21 +131,28 @@ export default defineComponent({
     };
 
     return (
-      <div class="approve-example-container">
-        <div class="node-panel">{NodePanel({ lf: this.lf })}</div>
-        <div id="id" ref="graph" class="viewport"></div>
-        {this.nodeData ? (
-          <div class="property-panel">
-            {PropertyPanel({
-              nodeData: this.nodeData,
-              updateProperty,
-              hidePropertyPanel,
-            })}
-          </div>
-        ) : (
-          ""
-        )}
-      </div>
+      <Fragment>
+        <div class="approve-example-container">
+          <div class="node-panel">{NodePanel({ lf: this.lf })}</div>
+          <div id="id" ref="graph" class="viewport"></div>
+          {this.nodeData ? (
+            <div class="property-panel">
+              {PropertyPanel({
+                nodeData: this.nodeData,
+                updateProperty,
+                hidePropertyPanel,
+              })}
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
+        <IoTools
+          lf={this.lf}
+          downloadName={`0000-logic-flow-${Date.now()}.json`}
+          uploadCallback={(ev) => this.uploadCallback(ev)}
+        ></IoTools>
+      </Fragment>
     );
   },
 });
